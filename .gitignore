@@ -1,0 +1,9 @@
+/.env
+/.vscode
+/config/*
+/data/*
+/logs/*
+/www/*
+/bin/*
+!/*/.gitkeep
+.DS_Store
