@@ -110,7 +110,11 @@ clean:
 	@echo "#"
 	@echo "# 🧹 Cleaning old container"
 	@echo "#"
-	cd bin; docker-compose down
+	if [ -d "bin" ]; \
+		then cd bin; docker-compose down; \
+	fi
+	pip uninstall -y Sphinx
+	pip uninstall -y sphinx-rtd-theme
 	@echo "#"
 	@echo "# ✅ Done"
 	@echo "#"
