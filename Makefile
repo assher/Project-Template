@@ -11,20 +11,21 @@ CODE =
 DOCS =
 # args: url to your laradock repository
 DOCKER = https://github.com/Laradock/laradock.git
+# args: args to docs
+THEME_NAME = sphinx_rtd_theme
+# args: args to project folder
 MAIN_BRANCH = master
 DEVELOP_BRANCH = develop
-THEME_NAME = sphinx_rtd_theme
 
 prepare:
 	@echo "#"
-	@echo "# 📦 Preparing..."
+	@echo "# 📦 Preparing folder for documentation..."
 	@echo "#"
 	pip install -U Sphinx
-	pip install sphinx-rtd-theme
+	pip install -U sphinx-rtd-theme
 	mkdir -p resources/docs
 	cd resources/docs; sphinx-quickstart
-	cd resources/docs; sed -i "/html_theme =/d" conf.py
-	cd resources/docs; echo "\nhtml_theme = '$(THEME_NAME)'"  >> conf.py
+	cd resources/docs; sed -i -e "/.*html_theme*./ s/.*/html_theme = '$(THEME_NAME)'/" conf.py
 certs:
 	@echo "#"
 	@echo "# 🏗️  Generate certs for https://${DOMAIN}"
@@ -43,6 +44,7 @@ add_submodules:
 	@echo "# 📦 Add submodules"
 	@echo "#"
 	git submodule add ${DOCKER} bin
+	cd bin; cp .env.example .env;
 
 update_submodules:
 	@echo "#"
