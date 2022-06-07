@@ -7,8 +7,8 @@ DATABASE =
 MANAGER = 
 # args: url to repository
 CODE = 
-# args: url to repository
-DOCS =
+# args: url to documentation
+DOCS = 
 # args: url to your laradock repository
 DOCKER = https://github.com/Laradock/laradock.git
 # args: args to docs
@@ -23,9 +23,9 @@ prepare:
 	@echo "#"
 	pip install -U Sphinx
 	pip install -U sphinx-rtd-theme
-	mkdir -p resources/docs
-	cd resources/docs; sphinx-quickstart
-	cd resources/docs; sed -i -e "/.*html_theme*./ s/.*/html_theme = '$(THEME_NAME)'/" conf.py
+	pip install -U myst-parser
+	git subtree add --prefix resources/docs ${DOCS} main --squash
+	
 certs:
 	@echo "#"
 	@echo "# 🏗️  Generate certs for https://${DOMAIN}"
@@ -76,7 +76,7 @@ start:
 	make certs
 	make install_certs
 	make build
-	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www  fi
+	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www;  fi
 	cd www; git checkout ${MAIN_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 	@echo "#"
@@ -102,7 +102,7 @@ devel:
 	@echo "#"
 	@echo "# 🚧 Building ${DOMAIN}"
 	@echo "#"
-	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www  fi
+	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www;  fi
 	cd www; git checkout ${DEVELOP_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 
