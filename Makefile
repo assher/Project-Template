@@ -31,7 +31,7 @@ certs:
 	@echo "# 🏗️  Generate certs for https://${DOMAIN}"
 	@echo "#"
 	mkdir -p ${SERVER}/ssl
-	if [ ! -d "${SERVER}/ssl" ]; then mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}; fi
+	if [ ! "${SERVER}/ssl/${DOMAIN}.crt" ]; then mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}; fi
 
 install_certs:
 	@echo "#"
