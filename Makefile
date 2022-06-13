@@ -76,7 +76,7 @@ start:
 	make certs
 	make install_certs
 	make build
-	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www;  fi
+	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} main --squash;  fi
 	cd www; git checkout ${MAIN_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 	@echo "#"
@@ -102,7 +102,7 @@ devel:
 	@echo "#"
 	@echo "# 🚧 Building ${DOMAIN}"
 	@echo "#"
-	if [ ! -d "www" ]; then echo "Dir no exists"; git clone ${CODE} www;  fi
+	if [ ! -d "www" ]; then echo "Dir no exists";git subtree add --prefix www ${CODE} develop --squash;;  fi
 	cd www; git checkout ${DEVELOP_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 
