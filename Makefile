@@ -14,7 +14,7 @@ DOCKER = https://github.com/Laradock/laradock.git
 # args: args to docs
 THEME_NAME = sphinx_rtd_theme
 # args: args to project folder
-MAIN_BRANCH = master
+MAIN_BRANCH = main
 DEVELOP_BRANCH = develop
 
 prepare:
@@ -24,14 +24,14 @@ prepare:
 	pip install -U Sphinx
 	pip install -U sphinx-rtd-theme
 	pip install -U myst-parser
-	git subtree add --prefix resources/docs ${DOCS} main --squash
+	if [ ! -d "resources/docs" ]; then git subtree add --prefix resources/docs ${DOCS} main --squash; fi
 	
 certs:
 	@echo "#"
 	@echo "# 🏗️  Generate certs for https://${DOMAIN}"
 	@echo "#"
 	mkdir -p ${SERVER}/ssl
-	mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}
+	if [ ! -d "${SERVER}/ssl" ]; then mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}; fi
 
 install_certs:
 	@echo "#"
@@ -43,21 +43,20 @@ add_submodules:
 	@echo "#"
 	@echo "# 📦 Add submodules"
 	@echo "#"
-	git submodule add ${DOCKER} bin
-	cd bin; cp .env.example .env;
+	if [ ! "bin/.env" ]; then git submodule add ${DOCKER} bin; cd bin; cp .env.example .env; fi
 
 update_submodules:
 	@echo "#"
 	@echo "# 📦 Update submodules"
 	@echo "#"
-	git submodule update --init --recursive --remote --merge
+	if [ -d "bin" ]; then git submodule update --init --recursive --remote --merge; fi
 
 build:
 	@echo "#"
 	@echo "# 🐳 Building ${DOMAIN}..."
 	@echo "#"
 	make update_submodules
-	cd bin; docker-compose build ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
+	if [ "bin/.env" ]; then cd bin; docker-compose build ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker; else @echo "not exist please run make add_submodules first"; fi
 	@echo "#"
 	@echo "# ✅ Done"
 	@echo "#"
@@ -67,7 +66,7 @@ build_no_cache:
 	@echo "# 🐳 Building ${DOMAIN} without cache... "
 	@echo "#"
 	make update_submodules
-	cd bin; docker-compose build ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker --no-cache
+	cd bin; docker-compose build --no-cache ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 	@echo "#"
 	@echo "# ✅ Done"
 	@echo "#"
@@ -102,7 +101,7 @@ devel:
 	@echo "#"
 	@echo "# 🚧 Building ${DOMAIN}"
 	@echo "#"
-	if [ ! -d "www" ]; then echo "Dir no exists";git subtree add --prefix www ${CODE} develop --squash;;  fi
+	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} develop --squash;  fi
 	cd www; git checkout ${DEVELOP_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis docker-in-docker
 
