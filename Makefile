@@ -46,7 +46,8 @@ add_submodules:
 	@echo "# 📦 Add submodules"
 	@echo "#"
 	if [ ! -f "bin/.env" ]; then git submodule add ${DOCKER} bin; cd bin; cp .env.example .env; fi
-	cd bin; git checkout ${DOCKER_MAIN_BRANCH}; cd..; git add bin; git commit -m "moved submodule to ${DOCKER_MAIN_BRANCH}"; git push;
+	cd bin; git checkout ${DOCKER_MAIN_BRANCH};
+	git add bin; git commit -m "moved submodule to ${DOCKER_MAIN_BRANCH}"; git push;
 
 update_submodules:
 	@echo "#"
@@ -78,7 +79,8 @@ start:
 	make certs
 	make install_certs
 	make build
-	cd bin; git checkout ${DOCKER_MAIN_BRANCH}; cd..; git add bin; git commit -m "moved submodule to ${DOCKER_MAIN_BRANCH}"; git push;
+	cd bin; git checkout ${DOCKER_MAIN_BRANCH};
+	git add bin; git commit -m "moved submodule to ${DOCKER_MAIN_BRANCH}"; git push;
 	make update_submodules
 	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} main --squash;  fi
 	cd www; git checkout ${MAIN_BRANCH}
@@ -106,7 +108,8 @@ devel:
 	@echo "#"
 	@echo "# 🚧 Building ${DOMAIN}"
 	@echo "#"
-	cd bin; git checkout ${DOCKER_MAIN_BRANCH}; cd..; git add bin; git commit -m "moved submodule to ${DOCKER_DEVELOP_BRANCH}"; git push;
+	cd bin; git checkout ${DOCKER_DEVELOP_BRANCH};
+	git add bin; git commit -m "moved submodule to ${DOCKER_DEVELOP_BRANCH}"; git push;
 	make update_submodules
 	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} develop --squash;  fi
 	cd www; git checkout ${DEVELOP_BRANCH}
