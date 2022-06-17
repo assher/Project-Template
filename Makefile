@@ -18,6 +18,7 @@ MAIN_BRANCH = main
 DEVELOP_BRANCH = develop
 DOCKER_MAIN_BRANCH = main
 DOCKER_DEVELOP_BRANCH = develop
+USE_SUBTREE = true
 
 prepare:
 	@echo "#"
@@ -26,14 +27,22 @@ prepare:
 	pip install -U Sphinx
 	pip install -U sphinx-rtd-theme
 	pip install -U myst-parser
-	if [ ! -d "resources/docs" ]; then git subtree add --prefix resources/docs ${DOCS} main --squash; fi
+	if [ ! -d "resources/docs" ]; then \
+		if ${USE_SUBTREE}; then \
+		 git subtree add --prefix resources/docs ${DOCS} ${MAIN_BRANCH} --squash; \
+		else \
+			git clone ${DOCS} resources/docs; \
+		fi \
+	fi
 	
 certs:
 	@echo "#"
 	@echo "# 🏗️  Generate certs for https://${DOMAIN}"
 	@echo "#"
 	mkdir -p ${SERVER}/ssl
-	if [ ! -f "${SERVER}/ssl/${DOMAIN}.crt" ]; then mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}; fi
+	if [ ! -f "${SERVER}/ssl/${DOMAIN}.crt" ]; then \
+		mkcert -cert-file ./${SERVER}/ssl/${DOMAIN}.crt -key-file ./${SERVER}/ssl/${DOMAIN}.key ${DOMAIN} *.${DOMAIN}; \
+	fi
 
 install_certs:
 	@echo "#"
@@ -60,7 +69,11 @@ build:
 	@echo "# 🐳 Building ${DOMAIN}..."
 	@echo "#"
 	make update_submodules
-	if [ -f "bin/.env" ]; then cd bin; docker-compose build ${SERVER} ${DATABASE} php-fpm ${MANAGER} redis; else @echo "not exist please run make add_submodules first"; fi
+	if [ -f "bin/.env" ]; then \
+		cd bin; docker-compose build ${SERVER} ${DATABASE} php-fpm ${MANAGER} redis; \
+	else \
+		@echo "not exist please run make add_submodules first"; \
+	fi
 	@echo "#"
 	@echo "# ✅ Done"
 	@echo "#"
@@ -82,7 +95,13 @@ start:
 	cd bin; git checkout ${DOCKER_MAIN_BRANCH};
 	git add bin; git commit -m "moved submodule to ${DOCKER_MAIN_BRANCH}"; git push;
 	make update_submodules
-	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} main --squash;  fi
+	if [ ! -d "www" ]; then \
+		if ${USE_SUBTREE}; then \
+		 echo "Dir no exists"; git subtree add --prefix www ${CODE} ${MAIN_BRANCH} --squash; \
+		else \
+			git clone ${CODE} www; \
+		fi \
+	fi
 	cd www; git checkout ${MAIN_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} redis
 	@echo "#"
@@ -111,7 +130,13 @@ devel:
 	cd bin; git checkout ${DOCKER_DEVELOP_BRANCH};
 	git add bin; git commit -m "moved submodule to ${DOCKER_DEVELOP_BRANCH}"; git push;
 	make update_submodules
-	if [ ! -d "www" ]; then echo "Dir no exists"; git subtree add --prefix www ${CODE} develop --squash;  fi
+	if [ ! -d "www" ]; then \
+		if ${USE_SUBTREE}; then \
+		 echo "Dir no exists"; git subtree add --prefix www ${CODE} ${DEVELOP_BRANCH} --squash; \
+		else \
+			git clone ${CODE} www; \
+		fi \
+	fi
 	cd www; git checkout ${DEVELOP_BRANCH}
 	cd bin; docker-compose up -d ${SERVER} ${DATABASE} php-fpm ${MANAGER} workspace redis
 
